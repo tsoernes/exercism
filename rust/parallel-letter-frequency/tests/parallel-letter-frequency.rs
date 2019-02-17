@@ -90,7 +90,26 @@ fn test_numbers_dont_count() {
 }
 
 #[test]
-fn test_all_three_anthems_1_worker() {
+fn test_all_three_anthems_1_worker_multibit_chars() {
+    let mut v = Vec::new();
+    let l = "Löwe 老虎 Léopard";
+    v.push(l);
+    for anthem in [ODE_AN_DIE_FREUDE, WILHELMUS, STAR_SPANGLED_BANNER].iter() {
+        for line in anthem.iter() {
+            v.push(*line);
+        }
+    }
+    let freqs = frequency::frequency(&v[..], 1);
+    assert_eq!(freqs.get(&'a'), Some(&50));
+    assert_eq!(freqs.get(&'t'), Some(&56));
+    assert_eq!(freqs.get(&'ü'), Some(&2));
+    assert_eq!(freqs.get(&'老'), Some(&1));
+    assert_eq!(freqs.get(&'虎'), Some(&1));
+    assert_eq!(freqs.get(&'é'), Some(&1));
+}
+
+#[test]
+fn test_all_three_anthems_1_workers() {
     let mut v = Vec::new();
     for anthem in [ODE_AN_DIE_FREUDE, WILHELMUS, STAR_SPANGLED_BANNER].iter() {
         for line in anthem.iter() {
