@@ -13,29 +13,19 @@ pub fn find(sum: u32) -> HashSet<[u32; 3]> {
     // b (2n - 2a) = n^2 - 2na
     // b  = (n^2 - 2na) / (2n - 2a)
     let sum_pow2: u32 = sum.pow(2);
-    let triplets = (1..sum / 3)
+    (1..sum / 3)
         .into_par_iter()
         .filter_map(|side_a| {
             let side_b = (sum_pow2 - 2 * sum * side_a) / (2 * sum - 2 * side_a);
             let side_c = sum - side_a - side_b;
             let is_valid_triangle = side_a.pow(2) + side_b.pow(2) == side_c.pow(2);
-            if is_valid_triangle {
+            // Avoid redundant triplet permutations
+            let is_not_redundant = side_a < side_b;
+            if is_valid_triangle && is_not_redundant {
                 Some([side_a, side_b, side_c])
             } else {
                 None
             }
         })
-        // Stop when 'a' becomes larger than or equal to 'b'
-        // to avoid redundant triplet permutations
-        .map(|sides| {
-            if sides[0] < sides[1] {
-                Some(sides)
-            } else {
-                None
-            }
-        })
-        .while_some()
-        .collect();
-
-    triplets
+        .collect()
 }
