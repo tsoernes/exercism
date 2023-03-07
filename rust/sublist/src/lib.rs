@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 #[derive(Debug, PartialEq)]
 pub enum Comparison {
     Equal,
@@ -7,29 +9,21 @@ pub enum Comparison {
 }
 
 pub fn sublist<T: PartialEq>(first_list: &[T], second_list: &[T]) -> Comparison {
-    let (short, long, cmp) = if first_list.len() == second_list.len() {
-        if first_list.len() == 0 {
-            return Comparison::Equal;
-        }
-        (first_list, second_list, Comparison::Equal)
-    } else if first_list.len() < second_list.len() {
-        (first_list, second_list, Comparison::Sublist)
-    } else {
-        (second_list, first_list, Comparison::Superlist)
-    };
-    for start in 0..long.len() {
-        if long.len() - start < short.len() {
-            return Comparison::Unequal;
-        }
-        if long
-            .iter()
-            .skip(start)
-            .zip(short.iter())
-            .map(|(e1, e2)| e1 == e2)
-            .all(|eq| eq)
-        {
-            return cmp;
-        }
+    match (first_list.len(), second_list.len()) {
+        (0, 0) => return Comparison::Equal,
+        (0, _) => return Comparison::Sublist,
+        (_, 0) => return Comparison::Superlist,
+        (_, _) => {}
     }
-    return Comparison::Unequal;
+    let (short, long, cmp) = match first_list.len().cmp(&second_list.len()) {
+        Ordering::Equal => (first_list, second_list, Comparison::Equal),
+        Ordering::Less => (first_list, second_list, Comparison::Sublist),
+        Ordering::Greater => (second_list, first_list, Comparison::Superlist),
+    };
+
+    if long.windows(short.len()).any(|window| window == short) {
+        cmp
+    } else {
+        Comparison::Unequal
+    }
 }
