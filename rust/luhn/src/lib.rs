@@ -1,25 +1,46 @@
 /// Check a Luhn checksum.
 pub fn is_valid(code: &str) -> bool {
+    // Spaces are allowed in the input, but they should be stripped before checking.
     let code = code.replace(" ", "");
+    // Strings of length 1 or less are not valid.
     if code.len() <= 1 {
         return false;
     }
-    let mut cnums: Vec<u32> = Vec::with_capacity(code.len());
-    for ch in code.chars() {
-        let num = ch as i32 - 48; // '0' -> 0, '1' -> 1, etc..
-        if num < 0 || num > 9 {
-            // character is not a digit, hence code is invalid
-            return false;
-        }
-        cnums.push(num as u32);
-    }
+    // Convert string to vector of ints
+    let mbcnums: Option<Vec<i32>> = code
+        .chars()
+        .try_fold(vec![], |mut cnums, ch| match ch.to_digit(10) {
+            Some(num) => {
+                cnums.push(num as i32);
+                Some(cnums)
+            }
+            None => None,
+        });
+    // All non-digit characters are disallowed.
+    let cnums: Vec<i32> = if let Some(cnums) = mbcnums {
+        cnums
+    } else {
+        return false;
+    };
 
-    for cnum in cnums.iter_mut().rev().skip(1).step_by(2) {
-        *cnum *= 2;
-        if *cnum > 9 {
-            *cnum -= 9;
-        }
-    }
-    let sum: u32 = cnums.iter().sum();
+    let sum: i32 = cnums
+        .iter()
+        .rev()
+        .enumerate()
+        .map(|(ix, &cnum)| {
+            // The first step of the Luhn algorithm is to double every second digit, starting from the right.
+            // If doubling the number results in a number greater than 9 then subtract 9 from the product
+            if ix > 0 && (ix + 1) % 2 == 0 {
+                if cnum > 4 {
+                    cnum * 2 - 9
+                } else {
+                    cnum * 2
+                }
+            } else {
+                cnum
+            }
+        })
+        // Then sum all digits
+        .sum();
     (sum % 10) == 0
 }
