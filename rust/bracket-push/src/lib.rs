@@ -1,26 +1,24 @@
 pub fn brackets_are_balanced(string: &str) -> bool {
-    let l_brackets: Vec<char> = vec!['[', '{', '('];
-    let r_brackets: Vec<char> = vec![']', '}', ')'];
+    const L_BRACKETS: [char; 3] = ['[', '{', '('];
+    const R_BRACKETS: [char; 3] = [']', '}', ')'];
 
-    let str_brackets: Vec<char> = string
+    let str_brackets = string
         .chars()
-        .filter(|c| l_brackets.contains(c) || r_brackets.contains(c))
-        .collect();
-    let mut stack = Vec::with_capacity(string.len());
-    for brack in str_brackets.into_iter() {
-        if l_brackets.contains(&brack) {
-            stack.push(brack);
-        } else if let Some(l_brack) = stack.pop() {
-            // Encountered a right bracket in the string, so popped a left bracket
-            // from the stack. If they are not the same kind of bracket,
-            // the expression is not balanced.
-            let l_brack_ix = r_brackets.iter().position(|b| b == &brack).unwrap();
-            if l_brack != *l_brackets.get(l_brack_ix).unwrap() {
-                return false;
+        .filter(|c| L_BRACKETS.contains(c) || R_BRACKETS.contains(c));
+    let mut stack = vec![];
+    for brack in str_brackets {
+        match L_BRACKETS.iter().position(|b| b == &brack) {
+            Some(brack_ix) => stack.push(brack_ix),
+            None => {
+                // Encountered a right bracket in the string, so popped a left bracket
+                // from the stack. If they are not the same kind of bracket,
+                // the expression is not balanced, or if the stack is empty,
+                // encountered a right bracket with an unmatched left bracket.
+                match stack.pop() {
+                    Some(brack_ix) if brack == R_BRACKETS[brack_ix] => {}
+                    _ => return false,
+                }
             }
-        } else {
-            // Encountered a right bracket with an unmatched left bracket.
-            return false;
         }
     }
     // If the stack is not empty, there's one or more left brackets with missing
