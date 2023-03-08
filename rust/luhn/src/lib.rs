@@ -7,15 +7,10 @@ pub fn is_valid(code: &str) -> bool {
         return false;
     }
     // Convert string to vector of ints
-    let mbcnums: Option<Vec<i32>> =
-        code.chars()
-            .try_fold(vec![], |mut cnums, ch| match ch.to_digit(10) {
-                Some(num) => {
-                    cnums.push(num as i32);
-                    Some(cnums)
-                }
-                None => None,
-            });
+    let mbcnums: Option<Vec<i32>> = code
+        .chars()
+        .map(|ch| Some(ch.to_digit(10)? as i32))
+        .collect();
     // All non-digit characters are disallowed.
     let Some(cnums) = mbcnums else { return false };
 
