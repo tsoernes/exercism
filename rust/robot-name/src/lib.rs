@@ -11,7 +11,6 @@ impl Robot {
             name: String::with_capacity(5),
         };
         new.reset_name();
-        println!("{}", new.name);
         new
     }
 
