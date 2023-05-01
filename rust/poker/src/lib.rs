@@ -6,7 +6,7 @@ use std::collections::HashMap;
 /// the winning hand(s) as were passed in, not reconstructed strings which happen to be equal.
 use std::str::FromStr;
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 enum Suit {
     Spades,
     Hearts,
@@ -28,7 +28,7 @@ enum Rank {
     Jack = 11,
     Queen = 12,
     King = 13,
-    Ace = 14,
+    Ace = 14, // Ace can also count as 1, but it only matters in the special case of a straight
 }
 
 #[derive(Debug, PartialEq, Eq)]
